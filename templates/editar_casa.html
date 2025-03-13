@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Casa de Aposta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .btn {
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Casa de Aposta</h1>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="nome">Nome da Casa de Aposta:</label>
+                <input type="text" id="nome" name="nome" value="{{ casa.nome }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="saldo">Saldo (R$):</label>
+                <input type="number" id="saldo" name="saldo" step="0.01" min="0" value="{{ casa.saldo }}" required>
+            </div>
+            
+            <div class="buttons">
+                <button type="submit" class="btn">Atualizar</button>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Surebets</title>
+    <style>
+        /* Base styles */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 1.8rem;
+            margin: 15px 0;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin: 15px 0;
+        }
+        
+        /* Layout components */
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        /* Table styles */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #007BFF;
+            color: white;
+            white-space: nowrap;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .summary-row {
+            background-color: #e6f7ff;
+            font-weight: bold;
+        }
+        
+        /* Button styles */
+        .btn {
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            margin: 5px;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: #007BFF;
+            border: 1px solid #007BFF;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Flash messages */
+        .flash-messages {
+            margin: 15px 0;
+        }
+        
+        .flash-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .flash-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        /* Text colors */
+        .positive {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .negative {
+            color: red;
+            font-weight: bold;
+        }
+        
+        /* Cards de Surebets */
+        .surebet-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .surebet-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: left;
+            position: relative;
+        }
+        
+        .surebet-card:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .card-header h3 {
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .data-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .data-value {
+            text-align: right;
+        }
+        
+        .apostas-section {
+            margin: 10px 0;
+            padding-top: 10px;
+            border-top: 1px dashed #dee2e6;
+        }
+        
+        .aposta-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .card-footer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status-pendente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-concluido {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        /* Filter styles */
+        .active-filter {
+            position: relative;
+        }
+
+        .active-filter::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 8px;
+            height: 8px;
+            background-color: #dc3545;
+            border-radius: 50%;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: black;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        /* Cards de Casas de Aposta */
+        .casas-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .casa-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: left;
+            position: relative;
+        }
+
+        .casa-card .card-header {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .casa-card .card-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
+            color: #007BFF;
+        }
+
+        .casa-card .card-body {
+            margin-bottom: 15px;
+        }
+
+        .casa-card .card-footer {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .summary-card {
+            background-color: #e6f7ff;
+            font-weight: bold;
+        }
+        
+        /* Media queries */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
+            
+            .section {
+                padding: 10px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 0.85rem;
+            }
+            
+            .btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                margin: 3px;
+            }
+            
+            .surebet-cards {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        
+        @media screen and (max-width: 576px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 0 5px;
+            }
+            
+            table, tr, td {
+                font-size: 0.75rem;
+            }
+            
+            .surebet-cards, .casas-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+            /* Estilo para o menu do usuário */
+        .user-profile {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-button:hover {
+            background-color: #0056b3;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .dropdown-item {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        .user-menu:hover .user-dropdown {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo à Gestão de Surebets!</h1>
+
+        <div class="user-profile">
+            <div class="user-menu">
+                <button class="user-button">{{ current_user.username }} <span>▼</span></button>
+                <div class="user-dropdown">
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Casas de Aposta Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Casas de Aposta Cadastradas:</h2>
+                <a href="{{ url_for('cadastrar_casa') }}" class="btn">Cadastrar Casa de Aposta</a>
+            </div>
+            {% if casas %}
+                <div class="casas-cards">
+                    {% for casa in casas %}
+                    <div class="casa-card">
+                        <div class="card-header">
+                            <h3>{{ casa.nome }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="data-row">
+                                <span class="data-label">Saldo disponível:</span>
+                                <span class="data-value">R$ {{ casa.saldo|round(2) }}</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Saldo em Aposta:</span>
+                                <span class="data-value">R$ {{ casa.saldo_em_aposta|round(2) }}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('editar_casa', id=casa.id) }}" class="btn">Editar</a>
+                            <a href="{{ url_for('excluir_casa', id=casa.id) }}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta casa de aposta?')">Excluir</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="casa-card summary-card">
+                        <div class="card-header">
+                            <h3>TOTAL</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="data-row">
+                                <span class="data-label">Saldo disponível:</span>
+                                <span class="data-value">R$ {{ saldo_total|round(2) }}</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Saldo em Aposta:</span>
+                                <span class="data-value">R$ {{ saldo_em_aposta_total|round(2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Nenhuma casa de aposta cadastrada.</p>
+            {% endif %}
+        </div>
+
+        <!-- Surebets Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Surebets Registradas:</h2>
+                <div>
+                    <button id="filterButton" class="btn btn-outline" title="Filtrar surebets">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
+                        </svg>
+                    </button>
+                    <a href="{{ url_for('adicionar_surebet') }}" class="btn">Adicionar Surebet</a>
+                </div>
+            </div>
+            {% if surebets %}
+            <div class="surebet-cards">
+                {% for surebet in surebets %}
+                <div class="surebet-card">
+                    <div class="card-header">
+                        <h3>Surebet #{{ surebet.id }}</h3>
+                        <div class="data-row">
+                            <span class="data-label">Data:</span>
+                            <span class="data-value">{{ surebet.data_cadastro.strftime('%d/%m/%Y %H:%M') }}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Status:</span>
+                            <span class="status-badge status-{{ surebet.status|lower }}">{{ surebet.status }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="apostas-section">
+                        <div class="aposta-item">
+                            <span>{{ surebet.casa_1.nome }}</span>
+                            <span>Odd: {{ surebet.odd_1|round(2) }}</span>
+                            <span>R$ {{ surebet.valor_1|round(2) }}</span>
+                        </div>
+                        <div class="aposta-item">
+                            <span>{{ surebet.casa_2.nome }}</span>
+                            <span>Odd: {{ surebet.odd_2|round(2) }}</span>
+                            <span>R$ {{ surebet.valor_2|round(2) }}</span>
+                        </div>
+                        {% if surebet.casa_3 %}
+                        <div class="aposta-item">
+                            <span>{{ surebet.casa_3.nome }}</span>
+                            <span>Odd: {{ surebet.odd_3|round(2) }}</span>
+                            <span>R$ {{ surebet.valor_3|round(2) }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="data-row">
+                        <span class="data-label">Valor Total:</span>
+                        <span class="data-value">R$ {{ surebet.valor_total|round(2) }}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Lucro Estimado:</span>
+                        <span class="data-value {% if surebet.lucro_estimado > 0 %}positive{% else %}negative{% endif %}">
+                            R$ {{ surebet.lucro_estimado|round(2) }}
+                        </span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">% Lucro:</span>
+                        <span class="data-value {% if surebet.percentual_lucro > 0 %}positive{% else %}negative{% endif %}">
+                            {{ surebet.percentual_lucro|round(2) }}%
+                        </span>
+                    </div>
+                    
+                    <div class="card-footer">
+                        {% if surebet.status == 'Pendente' %}
+                            <a href="{{ url_for('definir_resultado', id=surebet.id) }}" class="btn btn-success">Definir Resultado</a>
+                        {% else %}
+                            <a href="{{ url_for('reverter_status', id=surebet.id) }}" class="btn btn-warning" onclick="return confirm('Tem certeza que deseja reverter esta surebet para pendente?')">Reverter para Pendente</a>
+                        {% endif %}
+                        <a href="{{ url_for('excluir_surebet', id=surebet.id) }}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta surebet? Esta ação não pode ser desfeita.')">Excluir Surebet</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <p>Nenhuma surebet registrada.</p>
+            {% endif %}
+        </div>
+
+        <!-- Filter Modal -->
+        <div id="filterModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Filtrar Surebets</h3>
+                <form id="filterForm" method="GET" action="{{ url_for('home') }}">
+                    <div class="form-group">
+                        <label for="data_inicio">Data Início:</label>
+                        <input type="date" id="data_inicio" name="data_inicio" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data_fim">Data Fim:</label>
+                        <input type="date" id="data_fim" name="data_fim" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="casa_nome">Casa de Aposta:</label>
+                        <select id="casa_nome" name="casa_nome" class="form-control">
+                            <option value="">Todas</option>
+                            {% for casa in casas %}
+                                <option value="{{ casa.id }}">{{ casa.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select id="status" name="status" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Finalizada">Finalizada</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="btn">Aplicar Filtros</button>
+                        <button type="button" id="clearFilters" class="btn btn-outline">Limpar Filtros</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Modal de filtro
+        const filterButton = document.getElementById('filterButton');
+        const filterModal = document.getElementById('filterModal');
+        const closeModal = document.querySelector('.close-modal');
+        const clearFilters = document.getElementById('clearFilters');
+        
+        // Abrir modal ao clicar no botão de filtro
+        filterButton.addEventListener('click', function() {
+            filterModal.style.display = 'block';
+        });
+        
+        // Fechar modal ao clicar no X
+        closeModal.addEventListener('click', function() {
+            filterModal.style.display = 'none';
+        });
+        
+        // Fechar modal ao clicar fora dele
+        window.addEventListener('click', function(event) {
+            if (event.target == filterModal) {
+                filterModal.style.display = 'none';
+            }
+        });
+        
+        // Limpar filtros
+        clearFilters.addEventListener('click', function() {
+            document.getElementById('data_inicio').value = '';
+            document.getElementById('data_fim').value = '';
+            document.getElementById('casa_nome').value = '';
+            document.getElementById('status').value = '';
+        });
+        
+        // Verifica se há filtros ativos e adiciona indicador visual
+        function checkActiveFilters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('data_inicio') || urlParams.has('data_fim') || 
+                urlParams.has('casa_nome') || urlParams.has('status')) {
+                
+                filterButton.classList.add('active-filter');
+                
+                // Preenche os campos do formulário com os valores dos parâmetros
+                if (urlParams.has('data_inicio')) 
+                    document.getElementById('data_inicio').value = urlParams.get('data_inicio');
+                if (urlParams.has('data_fim')) 
+                    document.getElementById('data_fim').value = urlParams.get('data_fim');
+                if (urlParams.has('casa_nome')) 
+                    document.getElementById('casa_nome').value = urlParams.get('casa_nome');
+                if (urlParams.has('status')) 
+                    document.getElementById('status').value = urlParams.get('status');
+            }
+        }
+                // Toggle dropdown do usuário
+        document.addEventListener('DOMContentLoaded', function() {
+            const userButton = document.querySelector('.user-button');
+            const userDropdown = document.querySelector('.user-dropdown');
+            
+            if (userButton && userDropdown) {
+                userButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+                });
+                
+                // Fechar ao clicar fora
+                document.addEventListener('click', function() {
+                    userDropdown.style.display = 'none';
+                });
+                
+                // Impedir fechamento ao clicar no dropdown
+                userDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+        
+        // Executa verificação quando a página carrega
+        window.addEventListener('load', checkActiveFilters);
+    </script>
+</body>
+</html>

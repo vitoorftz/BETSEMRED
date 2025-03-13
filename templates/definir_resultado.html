@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definir Resultado da Surebet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            text-align: left;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #007BFF;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .option-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .btn {
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .aposta-info {
+            margin-top: 5px;
+            color: #666;
+        }
+        .destaque {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Definir Resultado da Surebet</h1>
+        
+        <form method="POST">
+            <div class="form-row">
+                <h3>Selecione a Casa de Aposta Vencedora:</h3>
+                
+                <div class="form-group">
+                    <div class="option-label">
+                        <input type="radio" id="casa_1" name="casa_vencedora" value="casa_1" required>
+                        <div class="option-info">
+                            <label for="casa_1">{{ surebet.casa_1.nome }}</label>
+                            <div class="aposta-info">
+                                <span class="destaque">Odd:</span> {{ surebet.odd_1|round(2) }} | 
+                                <span class="destaque">Valor Apostado:</span> R$ {{ surebet.valor_1|round(2) }} | 
+                                <span class="destaque">Retorno Potencial:</span> R$ {{ (surebet.valor_1 * surebet.odd_1)|round(2) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="option-label">
+                        <input type="radio" id="casa_2" name="casa_vencedora" value="casa_2" required>
+                        <div class="option-info">
+                            <label for="casa_2">{{ surebet.casa_2.nome }}</label>
+                            <div class="aposta-info">
+                                <span class="destaque">Odd:</span> {{ surebet.odd_2|round(2) }} | 
+                                <span class="destaque">Valor Apostado:</span> R$ {{ surebet.valor_2|round(2) }} | 
+                                <span class="destaque">Retorno Potencial:</span> R$ {{ (surebet.valor_2 * surebet.odd_2)|round(2) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if surebet.casa_3 %}
+                <div class="form-group">
+                    <div class="option-label">
+                        <input type="radio" id="casa_3" name="casa_vencedora" value="casa_3" required>
+                        <div class="option-info">
+                            <label for="casa_3">{{ surebet.casa_3.nome }}</label>
+                            <div class="aposta-info">
+                                <span class="destaque">Odd:</span> {{ surebet.odd_3|round(2) }} | 
+                                <span class="destaque">Valor Apostado:</span> R$ {{ surebet.valor_3|round(2) }} | 
+                                <span class="destaque">Retorno Potencial:</span> R$ {{ (surebet.valor_3 * surebet.odd_3)|round(2) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="buttons">
+                <button type="submit" class="btn">Confirmar Resultado</button>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

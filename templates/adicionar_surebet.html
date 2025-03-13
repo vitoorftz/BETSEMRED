@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Surebet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .form-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            min-width: 0;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn {
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .section-title {
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-top: 15px;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        .optional-fields {
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .calculated-results {
+            background-color: #e9f7ef;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-bottom: 1px solid #d5e8d5;
+        }
+        .result-label {
+            font-weight: bold;
+        }
+        .positive {
+            color: green;
+        }
+        .negative {
+            color: red;
+        }
+        .hidden {
+            display: none;
+        }
+        
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .form-group {
+                flex: 1 1 100%;
+            }
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                margin: 3px 0;
+            }
+            .section-title {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .result-row {
+                flex-direction: column;
+            }
+            .result-label {
+                margin-bottom: 3px;
+            }
+            input, select {
+                font-size: 16px; /* Evita zoom em campos de formulário no iOS */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Adicionar Nova Surebet</h1>
+        
+        <form method="POST" id="surebetForm">
+            <h3 class="section-title">Casa de Aposta 1</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="casa_1">Casa de Aposta:</label>
+                    <select id="casa_1" name="casa_1" required class="calc-field">
+                        <option value="">Selecione uma casa</option>
+                        {% for casa in casas %}
+                            <option value="{{ casa.id }}">{{ casa.nome }} (Saldo: R$ {{ casa.saldo|round(2) }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="odd_1">Odd:</label>
+                    <input type="number" id="odd_1" name="odd_1" step="0.01" min="1" required class="calc-field">
+                </div>
+                <div class="form-group">
+                    <label for="valor_1">Valor (R$):</label>
+                    <input type="number" id="valor_1" name="valor_1" step="0.01" min="0" required class="calc-field">
+                </div>
+            </div>
+            
+            <h3 class="section-title">Casa de Aposta 2</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="casa_2">Casa de Aposta:</label>
+                    <select id="casa_2" name="casa_2" required class="calc-field">
+                        <option value="">Selecione uma casa</option>
+                        {% for casa in casas %}
+                            <option value="{{ casa.id }}">{{ casa.nome }} (Saldo: R$ {{ casa.saldo|round(2) }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="odd_2">Odd:</label>
+                    <input type="number" id="odd_2" name="odd_2" step="0.01" min="1" required class="calc-field">
+                </div>
+                <div class="form-group">
+                    <label for="valor_2">Valor (R$):</label>
+                    <input type="number" id="valor_2" name="valor_2" step="0.01" min="0" required class="calc-field">
+                </div>
+            </div>
+            
+            <div class="optional-fields">
+                <h3 class="section-title">Casa de Aposta 3 (Opcional)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="casa_3">Casa de Aposta:</label>
+                        <select id="casa_3" name="casa_3" class="calc-field">
+                            <option value="">Selecione uma casa</option>
+                            {% for casa in casas %}
+                                <option value="{{ casa.id }}">{{ casa.nome }} (Saldo: R$ {{ casa.saldo|round(2) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="odd_3">Odd:</label>
+                        <input type="number" id="odd_3" name="odd_3" step="0.01" min="1" class="calc-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="valor_3">Valor (R$):</label>
+                        <input type="number" id="valor_3" name="valor_3" step="0.01" min="0" class="calc-field">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calculated-results" id="resultadosCalculados">
+                <h3 class="section-title">Resultados Calculados</h3>
+                <div class="result-row">
+                    <span class="result-label">Retorno Casa 1:</span>
+                    <span id="retorno1">R$ 0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Retorno Casa 2:</span>
+                    <span id="retorno2">R$ 0.00</span>
+                </div>
+                <div class="result-row" id="retorno3Container">
+                    <span class="result-label">Retorno Casa 3:</span>
+                    <span id="retorno3">R$ 0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Valor Total Apostado:</span>
+                    <span id="valorTotal">R$ 0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Lucro Estimado:</span>
+                    <span id="lucroEstimado">R$ 0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Percentual de Lucro:</span>
+                    <span id="percentualLucro">0.00%</span>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button type="button" id="calcularBtn" class="btn btn-secondary">Calcular Resultados</button>
+                <button type="submit" class="btn" id="submitBtn">Adicionar Surebet</button>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const casa3Select = document.getElementById('casa_3');
+            const retorno3Container = document.getElementById('retorno3Container');
+            const calcularBtn = document.getElementById('calcularBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const formulario = document.getElementById('surebetForm');
+            
+            // Ocultar o retorno da casa 3 por padrão
+            retorno3Container.classList.add('hidden');
+            
+            // Mostrar/ocultar o retorno da casa 3 com base na seleção
+            casa3Select.addEventListener('change', function() {
+                if (this.value) {
+                    retorno3Container.classList.remove('hidden');
+                } else {
+                    retorno3Container.classList.add('hidden');
+                }
+            });
+            
+            // Calcular os resultados ao clicar no botão
+            calcularBtn.addEventListener('click', calcularResultados);
+            
+            // Calcular antes de enviar o formulário
+            formulario.addEventListener('submit', function(e) {
+                e.preventDefault();
+                calcularResultados();
+                
+                // Confirmar com o usuário
+                if (confirm('Confirma a adição desta surebet com os resultados calculados?')) {
+                    this.submit();
+                }
+            });
+            
+            // Função para calcular os resultados
+            function calcularResultados() {
+                // Obter valores dos campos
+                const odd1 = parseFloat(document.getElementById('odd_1').value) || 0;
+                const odd2 = parseFloat(document.getElementById('odd_2').value) || 0;
+                const odd3 = parseFloat(document.getElementById('odd_3').value) || 0;
+                
+                const valor1 = parseFloat(document.getElementById('valor_1').value) || 0;
+                const valor2 = parseFloat(document.getElementById('valor_2').value) || 0;
+                const valor3 = parseFloat(document.getElementById('valor_3').value) || 0;
+                
+                const usaCasa3 = casa3Select.value && odd3 > 0 && valor3 > 0;
+                
+                // Calcular os retornos
+                const retorno1 = valor1 * odd1;
+                const retorno2 = valor2 * odd2;
+                const retorno3 = usaCasa3 ? valor3 * odd3 : Number.POSITIVE_INFINITY;
+                
+                // Calcular o valor total apostado
+                const valorTotal = valor1 + valor2 + (usaCasa3 ? valor3 : 0);
+                
+                // Determinar o lucro mínimo garantido
+                const minRetorno = Math.min(retorno1, retorno2, retorno3);
+                const lucroEstimado = minRetorno - valorTotal;
+                
+                // Calcular o percentual de lucro
+                const percentualLucro = valorTotal > 0 ? (lucroEstimado / valorTotal) * 100 : 0;
+                
+                // Atualizar os elementos na página
+                document.getElementById('retorno1').textContent = `R$ ${retorno1.toFixed(2)}`;
+                document.getElementById('retorno2').textContent = `R$ ${retorno2.toFixed(2)}`;
+                if (usaCasa3) {
+                    document.getElementById('retorno3').textContent = `R$ ${retorno3.toFixed(2)}`;
+                    retorno3Container.classList.remove('hidden');
+                } else {
+                    retorno3Container.classList.add('hidden');
+                }
+                
+                document.getElementById('valorTotal').textContent = `R$ ${valorTotal.toFixed(2)}`;
+                
+                const lucroEstimadoElement = document.getElementById('lucroEstimado');
+                lucroEstimadoElement.textContent = `R$ ${lucroEstimado.toFixed(2)}`;
+                lucroEstimadoElement.className = lucroEstimado >= 0 ? 'positive' : 'negative';
+                
+                const percentualLucroElement = document.getElementById('percentualLucro');
+                percentualLucroElement.textContent = `${percentualLucro.toFixed(2)}%`;
+                percentualLucroElement.className = percentualLucro >= 0 ? 'positive' : 'negative';
+                
+                // Tornar visível a seção de resultados
+                document.getElementById('resultadosCalculados').style.display = 'block';
+            }
+            
+            // Calcular automaticamente quando qualquer campo mudar
+            const calcFields = document.querySelectorAll('.calc-field');
+            calcFields.forEach(field => {
+                field.addEventListener('change', calcularResultados);
+                field.addEventListener('input', calcularResultados);
+            });
+        });
+    </script>
+</body>
+</html>
