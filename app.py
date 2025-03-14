@@ -1,52 +1,24 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
+from datetime import datetime
 from sqlalchemy import func
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
 
-# Primeiro, crie a aplicação Flask
 app = Flask(__name__)
 
 # Configuração do Banco de Dados
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///saldos.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "surebet_secret_key"  # Necessário para mensagens flash
-
-# Inicialize o SQLAlchemy
 db = SQLAlchemy(app)
-
-# Agora, configure o LoginManager
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
 #app.run(host="192.168.1.105", port=5000, debug=True)
 
-class Usuario(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    casas = db.relationship('CasaAposta', backref='usuario', lazy=True)
-    surebets = db.relationship('Surebet', backref='usuario', lazy=True)
-    
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-        
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-    
-    @login_manager.user_loader
-    def load_user(user_id):
-        return Usuario.query.get(int(user_id))
-
-# Modificação no modelo CasaAposta para associar a um usuário
+# Modelo de Casa de Aposta
 class CasaAposta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     saldo = db.Column(db.Float, nullable=False)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
 
-# Modificação no modelo Surebet para associar a um usuário
 class Surebet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     casa_1_id = db.Column(db.Integer, db.ForeignKey('casa_aposta.id'), nullable=False)
@@ -59,20 +31,19 @@ class Surebet(db.Model):
     valor_2 = db.Column(db.Float, nullable=False)
     valor_3 = db.Column(db.Float, nullable=True)
     lucro_estimado = db.Column(db.Float, nullable=True)
-    valor_total = db.Column(db.Float, nullable=True)
-    percentual_lucro = db.Column(db.Float, nullable=True)
-    data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='Pendente')
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    valor_total = db.Column(db.Float, nullable=True)  # Valor total apostado
+    percentual_lucro = db.Column(db.Float, nullable=True)  # Percentual de lucro
+    data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)  # Data de cadastro
+    status = db.Column(db.String(20), default='Pendente')  # Status da surebet (Pendente, Finalizada, etc.)
 
     casa_1 = db.relationship('CasaAposta', foreign_keys=[casa_1_id])
     casa_2 = db.relationship('CasaAposta', foreign_keys=[casa_2_id])
     casa_3 = db.relationship('CasaAposta', foreign_keys=[casa_3_id])
 
-# Modificação na função calcular_saldo_em_aposta
+# Função para calcular o saldo em aposta para cada casa
 def calcular_saldo_em_aposta():
-    casas = CasaAposta.query.filter_by(usuario_id=current_user.id).all()
-    surebets_pendentes = Surebet.query.filter_by(usuario_id=current_user.id, status='Pendente').all()
+    casas = CasaAposta.query.all()
+    surebets_pendentes = Surebet.query.filter_by(status='Pendente').all()
     
     # Inicializar saldo em aposta como zero para todas as casas
     for casa in casas:
@@ -92,65 +63,11 @@ def calcular_saldo_em_aposta():
     
     return casas, saldo_total, saldo_em_aposta_total
 
+
 with app.app_context():
     db.create_all() 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        user = Usuario.query.filter_by(username=username).first()
-        
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Login realizado com sucesso!', 'success')
-            return redirect(url_for('home'))
-        else:
-            flash('Nome de usuário ou senha incorretos.', 'danger')
-    
-    return render_template('login.html')
-
-@app.route('/registro', methods=['GET', 'POST'])
-def registro():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-        
-        # Verificar se o nome de usuário já existe
-        user_exists = Usuario.query.filter_by(username=username).first()
-        if user_exists:
-            flash('Nome de usuário já está em uso.', 'danger')
-            return render_template('registro.html')
-        
-        # Verificar se as senhas coincidem
-        if password != confirm_password:
-            flash('As senhas não coincidem.', 'danger')
-            return render_template('registro.html')
-        
-        # Criar novo usuário
-        new_user = Usuario(username=username)
-        new_user.set_password(password)
-        
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash('Conta criada com sucesso! Faça o login.', 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('registro.html')
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('Você foi desconectado.', 'success')
-    return redirect(url_for('login'))
-
 @app.route('/')
-@login_required
 def home():
     # Obter parâmetros de filtro
     data_inicio = request.args.get('data_inicio')
@@ -158,8 +75,8 @@ def home():
     casa_nome = request.args.get('casa_nome')
     status = request.args.get('status')
     
-    # Base query para surebets (filtrar por usuário atual)
-    query = Surebet.query.filter_by(usuario_id=current_user.id)
+    # Base query para surebets
+    query = Surebet.query
     
     # Aplicar filtros
     if data_inicio:
@@ -194,16 +111,13 @@ def home():
                           saldo_total=saldo_total,
                           saldo_em_aposta_total=saldo_em_aposta_total)
 
-
-# Modificação na rota cadastrar_casa
 @app.route('/cadastrar_casa', methods=['GET', 'POST'])
-@login_required
 def cadastrar_casa():
     if request.method == 'POST':
         nome = request.form['nome']
         saldo = float(request.form['saldo'])
         
-        nova_casa = CasaAposta(nome=nome, saldo=saldo, usuario_id=current_user.id)
+        nova_casa = CasaAposta(nome=nome, saldo=saldo)
         db.session.add(nova_casa)
         db.session.commit()
         
@@ -245,17 +159,64 @@ def excluir_casa(id):
     flash('Casa de aposta excluída com sucesso!', 'success')
     return redirect(url_for('home'))
 
-# Modificação na rota adicionar_surebet
 @app.route('/adicionar_surebet', methods=['GET', 'POST'])
-@login_required
 def adicionar_surebet():
-    casas = CasaAposta.query.filter_by(usuario_id=current_user.id).all()
-    
+    casas = CasaAposta.query.all()
     if request.method == 'POST':
-        # Resto do código permanece igual
-        # ...
+        casa_1_id = request.form['casa_1']
+        casa_2_id = request.form['casa_2']
+        casa_3_id = request.form.get('casa_3')
+
+        odd_1 = float(request.form['odd_1'])
+        odd_2 = float(request.form['odd_2'])
+        odd_3 = float(request.form['odd_3']) if request.form.get('odd_3') and request.form.get('odd_3') != '' else 0.0
+
+        valor_1 = float(request.form['valor_1'])
+        valor_2 = float(request.form['valor_2'])
+        valor_3 = float(request.form['valor_3']) if request.form.get('valor_3') and request.form.get('valor_3') != '' else 0.0
+
+        # Calcular valor total apostado
+        valor_total = valor_1 + valor_2 + (valor_3 if casa_3_id and casa_3_id != '' else 0)
+
+        # Calcular retornos por casa
+        retorno_1 = valor_1 * odd_1
+        retorno_2 = valor_2 * odd_2
+        retorno_3 = valor_3 * odd_3 if (casa_3_id and casa_3_id != '' and valor_3 > 0 and odd_3 > 0) else float('inf')
         
-        # Adicionar o usuário_id à nova surebet
+        # Determinar o menor retorno (lucro garantido)
+        min_retorno = min(retorno_1, retorno_2, retorno_3)
+        
+        # Calcular lucro estimado e percentual
+        lucro_estimado = min_retorno - valor_total
+        percentual_lucro = (lucro_estimado / valor_total) * 100 if valor_total > 0 else 0
+
+        # Obter as casas de apostas
+        casa_1 = CasaAposta.query.get(casa_1_id)
+        casa_2 = CasaAposta.query.get(casa_2_id)
+        casa_3 = CasaAposta.query.get(casa_3_id) if casa_3_id and casa_3_id != '' else None
+
+        # Verificar se há saldo suficiente em cada casa
+        if casa_1.saldo < valor_1:
+            flash(f'Saldo insuficiente na casa {casa_1.nome}!', 'danger')
+            return redirect(url_for('adicionar_surebet'))
+        
+        if casa_2.saldo < valor_2:
+            flash(f'Saldo insuficiente na casa {casa_2.nome}!', 'danger')
+            return redirect(url_for('adicionar_surebet'))
+        
+        if casa_3 and valor_3 > 0 and casa_3.saldo < valor_3:
+            flash(f'Saldo insuficiente na casa {casa_3.nome}!', 'danger')
+            return redirect(url_for('adicionar_surebet'))
+
+        # Deduzir os valores das casas de apostas
+        if casa_1:
+            casa_1.saldo -= valor_1
+        if casa_2:
+            casa_2.saldo -= valor_2
+        if casa_3 and valor_3 > 0:
+            casa_3.saldo -= valor_3
+
+        # Criar a nova surebet
         nova_surebet = Surebet(
             casa_1_id=casa_1_id,
             casa_2_id=casa_2_id,
@@ -270,13 +231,14 @@ def adicionar_surebet():
             valor_total=valor_total,
             percentual_lucro=percentual_lucro,
             data_cadastro=datetime.utcnow(),
-            status='Pendente',
-            usuario_id=current_user.id
+            status='Pendente'
         )
-        
-        # Resto do código permanece igual
-        # ...
-    
+
+        db.session.add(nova_surebet)
+        db.session.commit()
+        flash('Surebet cadastrada com sucesso!', 'success')
+        return redirect(url_for('home'))
+
     return render_template('adicionar_surebet.html', casas=casas)
 
 @app.route('/definir_resultado/<int:id>', methods=['GET', 'POST'])

@@ -453,77 +453,11 @@
                 grid-template-columns: 1fr;
             }
         }
-            /* Estilo para o menu do usuário */
-        .user-profile {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            z-index: 100;
-        }
-
-        .user-menu {
-            position: relative;
-            display: inline-block;
-        }
-
-        .user-button {
-            background-color: #007BFF;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-button:hover {
-            background-color: #0056b3;
-        }
-
-        .user-dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
-
-        .dropdown-item {
-            color: #333;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            text-align: left;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f1f1f1;
-        }
-
-        .user-menu:hover .user-dropdown {
-            display: block;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Bem-vindo à Gestão de Surebets!</h1>
-
-        <div class="user-profile">
-            <div class="user-menu">
-                <button class="user-button">{{ current_user.username }} <span>▼</span></button>
-                <div class="user-dropdown">
-                    <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
-                </div>
-            </div>
-        </div>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -764,28 +698,6 @@
                     document.getElementById('status').value = urlParams.get('status');
             }
         }
-                // Toggle dropdown do usuário
-        document.addEventListener('DOMContentLoaded', function() {
-            const userButton = document.querySelector('.user-button');
-            const userDropdown = document.querySelector('.user-dropdown');
-            
-            if (userButton && userDropdown) {
-                userButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                // Fechar ao clicar fora
-                document.addEventListener('click', function() {
-                    userDropdown.style.display = 'none';
-                });
-                
-                // Impedir fechamento ao clicar no dropdown
-                userDropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            }
-        });
         
         // Executa verificação quando a página carrega
         window.addEventListener('load', checkActiveFilters);
