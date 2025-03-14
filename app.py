@@ -92,9 +92,8 @@ def calcular_saldo_em_aposta():
     
     return casas, saldo_total, saldo_em_aposta_total
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+with app.app_context():
+    db.create_all() 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
